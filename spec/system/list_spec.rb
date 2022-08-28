@@ -6,7 +6,7 @@ desribe '投稿のテスト' do
 
   let!(:list) {create(:list, title:'hoge', body:'body')}
 
-  describe 'トップ画面のテスト' do
+  describe 'トップ画面(top_path)のテスト' do
     before do
       visit top_path
     end
@@ -36,7 +36,7 @@ desribe '投稿のテスト' do
       it '投稿後のリダイレクト先は正しいか' do
         fill_in 'list[title]', with: Faker::Lorem.character(number:5)
         fill_in 'list[body]', with: Faker::Lorem.character(number:20)
-        click_button 'Create Book'
+        click_button '投稿'
         expect(page).to have_current_path list_path(List.last)
       end
     end
@@ -60,7 +60,44 @@ desribe '投稿のテスト' do
     end
     context '表示のテスト' do
       it '削除リンクが存在しているか' do
-        expect(show_link.native.inner_text).to match()
+        expect(show_link[:href]).to eq list_path(list)
+      end
+      it '編集リンクは存在しているか' do
+        expect(show_link[:href]).to eq edit_list(list)
+      end
+    end
+    context 'リンクの遷移先確認' do
+      it '編集の遷移先は編集画面か' do
+        edit_link.click
+        expect(current_path).to eq('/list/' + list.id.to.s + '/edit')
+      end
+    end
+    context 'list削除のテスト' do
+      it 'listの削除' do
+        expect{list.destroy}.to change{List.count}.by(-1)
+      end
+    end
+  end
+
+  describe '編集画面のテスト' do
+    before do
+      visit edit_list_path(list)
+    end
+    context '表示の確認' do
+      it '編集前のタイトルと本文がフォームにセットされている' do
+        expect(page).to have_field 'list[title]', with: list.title
+        expect(page).to have_field 'list[body]', with: list.body
+      end
+      it '保存ボタンが表示されている' do
+        expect(page).to have_button '保存'
+      end
+    end
+    context '更新処理に関するテスト' do
+      it '更新後のリダイレクト先は正しいか' do
+        fill_in 'list[title]', with: Faker::Lorem.character(number:5)
+        fill_in 'list[body]', with: Faker::Lorem.character(number:20)
+        click_button '保存'
+        expect(page).to have_current_path list_path(list)
       end
     end
   end
