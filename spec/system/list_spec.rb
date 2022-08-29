@@ -60,14 +60,15 @@ desribe '投稿のテスト' do
     end
     context '表示のテスト' do
       it '削除リンクが存在しているか' do
-        expect(show_link[:href]).to eq list_path(list)
+        expect(page).to have_link '削除'
       end
       it '編集リンクは存在しているか' do
-        expect(show_link[:href]).to eq edit_list(list)
+        expect(page).to have_link '編集'
       end
     end
     context 'リンクの遷移先確認' do
       it '編集の遷移先は編集画面か' do
+        edit_link find_all('a')[3]
         edit_link.click
         expect(current_path).to eq('/list/' + list.id.to.s + '/edit')
       end
